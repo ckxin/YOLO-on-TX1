@@ -9,7 +9,7 @@ extern int loading=0;
 extern int x11=0,y11=0,x12=0,y12=0,diff=0;
 extern int grabx11=0,graby11=0,grabx12=0,graby12=0;
 //extern int grabImgnum=0;
-extern char labstr[4096]={0},grabstr[4096]={0},labelshowstr[4096]={0};
+extern char labstr[4096]={0},grabstr[4096]={0},labelshowstr[4096]={0},Imglabelstr[4096]={0};
 //grabImgname[512]={0},rectgrabImgname[512]={0};
 extern char **p;
 

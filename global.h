@@ -14,7 +14,7 @@ extern int ifsame,grabclick,ifcoordinate,grabwrite,grabdetect;
 extern int loading;
 extern int x11,y11,x12,y12,diff;
 extern int grabx11,graby11,grabx12,graby12;
-extern char labstr[4096],grabstr[4096],labelshowstr[4096];
+extern char labstr[4096],grabstr[4096],labelshowstr[4096],Imglabelstr[4096];
 //grabImgname[512],rectgrabImgname[512];
 extern char **p;
 

@@ -249,9 +249,10 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
     extern int x11,y11,x12,y12,diff;
     extern int grabdetect;
     extern int grabx11,graby11,grabx12,graby12;
-    extern char labstr[4096],grabstr[4096],labelshowstr[4096];
+    extern char labstr[4096],grabstr[4096],labelshowstr[4096],Imglabelstr[4096];
     extern int ifsame,ifcoordinate;
     char detectionclass[256];
+    char coorstr[256];
 
     if(grabdetect == 1)
     {
@@ -272,6 +273,8 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
             x12=0;
             y12=0;
             ifsame=0;
+            diff=0;
+            memset(Imglabelstr,0,4096);
             memset(labstr,0,4096);
 
         }
@@ -321,14 +324,23 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
             if(top < 0) top = 0;
             if(bot > im.h-1) bot = im.h-1;
 
-            if((x11-left) < 20 && (y11-top) < 20 && (x12-right) < 20 && (y12-bot) < 20)
+            if(abs(x11-left) < 20 && abs(y11-top) < 20 && abs(x12-right) < 20 && abs(y12-bot) < 20)
             {
                 diff=diff+1;
+                sprintf(coorstr,"diff:x11= %i,y11= %i,x12= %i,y12= %i \n",x11,y11,x12,y12);
+                strcat(Imglabelstr,coorstr);
+                bzero(coorstr,sizeof(coorstr));
+            }
+            else
+            {
+                diff=0;
+                bzero(Imglabelstr,sizeof(labelshowstr));
+
             }
 
             x11=left;y11=top;x12=right;y12=bot;
 
-            printf("grabdetect= %i \n",grabdetect);
+
             if(grabdetect==1)
             {
 
@@ -336,7 +348,7 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
                 strcat(grabstr, labstr);
                 grabdetect=0;
                 ifcoordinate=1;
-                printf("grab coor: x11= %i,y11= %i,x12= %i,y12= %i \n",x11,y11,x12,y12);
+                //printf("grab coor: x11= %i,y11= %i,x12= %i,y12= %i \n",x11,y11,x12,y12);
 
             }
         }
@@ -354,11 +366,13 @@ void draw_detections(image im, detection *dets, int num, float thresh, char **na
                 x12=0;
                 y12=0;
                 ifsame=0;
+                diff=0;
+                memset(Imglabelstr,0,4096);
                 memset(labstr,0,4096);
             }
         }
-        printf("x11= %i,y11= %i,x12= %i,y12= %i \n",x11,y11,x12,y12);
-        printf("classname= %s \n",labstr);
+        //printf("x11= %i,y11= %i,x12= %i,y12= %i \n",x11,y11,x12,y12);
+        //printf("classname= %s \n",labstr);
 
     }
 }

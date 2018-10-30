@@ -630,7 +630,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             strtok(input, "\n");
         }
 
-        printf("test filename: %s \n",input);
+        //printf("test filename: %s \n",input);
         if(grabdetect==1)
         {
             sprintf(filenamestr,"test filename: %s \n",input);

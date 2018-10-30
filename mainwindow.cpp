@@ -16,13 +16,15 @@
 #include <global.h>
 #include <opencv2/opencv.hpp>
 #include <QPixmap>
-
+#include <qfont.h>
 
 using namespace std;
 using namespace cv;
 
 
 Mat Imgframe;
+char coordinatestr[256]={0};
+char infostr[4096]={0};
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -87,7 +89,8 @@ MainWindow::MainWindow(QWidget *parent)
     DataLabel = new QLabel;
     DataLabel->setFrameStyle(QFrame::Panel|QFrame::Sunken);
     int w2=g_nActScreenW*0.48;
-    int h2=g_nActScreenH*0.035;
+    //int h2=g_nActScreenH*0.035;
+    int h2=g_nActScreenH*0.075;
     DataLabel->setFixedHeight(h2);
     DataLabel->setFixedWidth(w2);
     DataLabel->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -95,8 +98,8 @@ MainWindow::MainWindow(QWidget *parent)
     DataLabel1 = new QLabel;
     DataLabel1->setFrameStyle(QFrame::Panel|QFrame::Sunken);
     int w3=g_nActScreenW*0.48;
-    //int h3=g_nActScreenH*0.035;
-    int h3=g_nActScreenH*0.075;
+    int h3=g_nActScreenH*0.035;
+    //int h3=g_nActScreenH*0.075;
     DataLabel1->setFixedHeight(h3);
     DataLabel1->setFixedWidth(w3);
     DataLabel1->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -117,21 +120,26 @@ MainWindow::MainWindow(QWidget *parent)
     CameraBtn->setFixedHeight(h4);
     CameraBtn->setFixedWidth(w4);
     CameraBtn->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    CameraBtn->setFont(QFont("Times",20,QFont::Bold));
+    //CameraBtn->setStyleSheet("background-color:rgb(255,10,10)");
 
     GrabBtn = new QPushButton("Grab");
     GrabBtn->setFixedHeight(h4);
     GrabBtn->setFixedWidth(w4);
     GrabBtn->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    GrabBtn->setFont(QFont("Times",20,QFont::Bold));
 
     ReImgshowBtn = new QPushButton("ReImgshow");
     ReImgshowBtn->setFixedHeight(h4);
     ReImgshowBtn->setFixedWidth(w4);
     ReImgshowBtn->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    ReImgshowBtn->setFont(QFont("Times",20,QFont::Bold));
 
     ShutdownBtn = new QPushButton("Shutdown");
     ShutdownBtn->setFixedHeight(h4);
     ShutdownBtn->setFixedWidth(w4);
     ShutdownBtn->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    ShutdownBtn->setFont(QFont("Times",20,QFont::Bold));
 
 
 
@@ -164,7 +172,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timer,SIGNAL(timeout()),this,SLOT(timerUpdate()));
     timer->start(1000);
     connect(CameraBtn,SIGNAL(clicked()),this,SLOT(slotCamera()));
-    //connect(GrabBtn,SIGNAL(clicked()),this,SLOT(slotGrab()));
     connect(GrabBtn,SIGNAL(clicked()),this,SLOT(slotGrabthread()));
     connect(ReImgshowBtn,SIGNAL(clicked()),this,SLOT(slotReImgshow()));
     connect(ShutdownBtn,SIGNAL(clicked()),this,SLOT(on_ShutdownBtn_clicked()));
@@ -226,6 +233,7 @@ void MainWindow::slotVideo()
     showframe=frame.clone();
 
     rectangle(showframe,cvPoint(x11,y11),cvPoint(x12,y12),Scalar(255,0,0),3,1,0);
+    sprintf(coordinatestr,"     x11=%i,y11=%i,x12=%i,y12=%i",x11,y11,x12,y12);
     IplImage temp = showframe; //转化为CvMat类型，而不是复制数据
     IplImage *frame1 = cvCloneImage(&temp);
     cvPutText(frame1,labstr,cvPoint(x11,y11-10),&font,Scalar(255,0,0));
@@ -234,18 +242,21 @@ void MainWindow::slotVideo()
     writingImg=false;
     cv::cvtColor(showframe, Rgb, CV_BGR2RGB);//颜色空间转换
     showframe.release();
+    strcat(infostr,labstr);
+    strcat(infostr,coordinatestr);
+    //bzero(labstr,sizeof(labstr));
+    bzero(coordinatestr,sizeof(coordinatestr));
 
     if(!ifgrab)
     {
         if(diff == 4)
-        {
+        {            
             diff=0;
             if(ifsame==0)
-            {
-                cout << "ifsame=" << ifsame << endl;
+            {               
                 Imgframe=Rgb;
-                emit Imgshow("Imgshow");
-                connect(this,SIGNAL(Imgshow(QString)),this,SLOT(slotImgshow()));
+                emit Imgshow("Imgshow");                
+                connect(this,SIGNAL(Imgshow(QString)),this,SLOT(slotImgshow()),Qt::UniqueConnection);
 
             }
         }
@@ -255,6 +266,9 @@ void MainWindow::slotVideo()
 
     CameraLabel->setPixmap(QPixmap::fromImage(Img));
     CameraLabel->show();
+    QString infoshowstr=infostr;
+    DataLabel1->setText(infoshowstr);
+    bzero(infostr,sizeof(infostr));
 
 }
 
@@ -277,11 +291,15 @@ void MainWindow::slotGrab()
         QPixmap pixmap("/home/ubuntu/Qt/Qt-realtime-detection/Grab/rectgrabframe.jpg");
         ImgLabel->setPixmap(pixmap);
         ImgLabel->show();
+        char ds[256]={0};
+        strcat(ds,"12345");
+        //DataLabel->setText(str);
+        strcat(labelshowstr,ds);
         QString showstr=labelshowstr;
-        DataLabel1->setText(showstr);
+        //strcat(showstr,str);
+        DataLabel->setText(showstr);
+        //bzero(str,sizeof(str));
         bzero(labelshowstr,sizeof(labelshowstr));
-        QString str="12345";
-        DataLabel->setText(str);
         GrabBtn ->setEnabled(true);
 
 
@@ -294,6 +312,9 @@ void MainWindow::slotImgshow()
     showImg = QImage((const uchar*)(Imgframe.data), Imgframe.cols, Imgframe.rows, Imgframe.cols * Imgframe.channels(), QImage::Format_RGB888);
     ImgLabel->setPixmap(QPixmap::fromImage(showImg));
     ImgLabel->show();
+    QString showstr=Imglabelstr;
+    DataLabel->setText(showstr);
+    bzero(labelshowstr,sizeof(Imglabelstr));
     ifsame=1;
 
 
